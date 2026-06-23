@@ -14,8 +14,8 @@ COLOR=true
 TOP_PROC_COUNT=8
 
 # ─── arg parsing ───────────────────────────────────────
-while [[ $# -gt 0 ]]; do
-  case $1 in
+while [[ ${1:-} != "" ]]; do
+  case ${1:-} in
     --watch)     WATCH=true ;;
     --interval)  INTERVAL="$2"; shift ;;
     --no-color)  COLOR=false ;;
