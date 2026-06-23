@@ -5,7 +5,7 @@
 # ╚══════════════════════════════════════════════════════╝
 # Usage: bash sysmon.sh [--watch] [--interval N] [--no-color]
 
-set -euo pipefail
+set -eo pipefail
 
 # ─── config ────────────────────────────────────────────
 WATCH=false
@@ -63,8 +63,8 @@ bar() {
   else                       color=$G
   fi
   printf "${DIM}[${RST}${color}%s${RST}${DIM}%s${RST}${DIM}]${RST}" \
-    "$(printf '█%.0s' $(seq 1 $filled))" \
-    "$(printf '░%.0s' $(seq 1 $empty))"
+    $([ $filled -gt 0 ] && printf "█%.0s" $(seq 1 $filled) || true) \
+    $([ $empty -gt 0 ] && printf "░%.0s" $(seq 1 $empty) || true)
 }
 
 kv() {
@@ -99,7 +99,7 @@ collect_cpu() {
   idle1=$(echo "$cpu1"  | awk '{print $2}')
   total2=$(echo "$cpu2" | awk '{print $1}')
   idle2=$(echo "$cpu2"  | awk '{print $2}')
-  CPU_PCT=$(( (1000 * (total2-total1-(idle2-idle1)) / (total2-total1) + 5) / 10 ))
+  local diff=$(( total2 - total1 )); [[ $diff -eq 0 ]] && diff=1; CPU_PCT=$(( (1000 * (diff - (idle2-idle1)) / diff + 5) / 10 )); [[ $CPU_PCT -lt 0 ]] && CPU_PCT=0; [[ $CPU_PCT -gt 100 ]] && CPU_PCT=100
 
   # temperature (try multiple paths)
   CPU_TEMP="N/A"
